@@ -66,6 +66,7 @@ def assert_inverted_index_file_eq(path1, path2):
         assert_inverted_index_line_eq(line1, line2, debug_info)
 
     # Verify correct number of terms
+
     assert len(lines1) == len(lines2), (
         f"Number of lines mismatch:\n"
         f"path1 = {str(path1)}\n"

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>ask485?</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    </head>
+    <body>
+        <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+        <form action="/" method="GET" class="search_bar">
+            <input type="text" 
+                name="q" 
+                placeholder="Click to start typing" 
+                value="{{ request.args.get('q', '') }}"
+                
+            />
+            <input type="range" 
+                name="w" 
+                min="0" 
+                max="1" 
+                step="0.01" 
+                value="{{ request.args.get('w', '0.5') }}"
+            />
+            <input type="submit" value="Search"/>
+        </form>
+        {% if not have_result %}
+        <div class="no_results">No search results found!</div>
+        {% endif %}
+        {% for page in pages %}
+        <a class="doc_url">{{ page.url }}</a>
+        <div class="doc_title">{{page.title}}</div>
+        <div class="doc_summary">{{page.summary}}</div>
+        {% endfor %}
+    </body>
+</html>

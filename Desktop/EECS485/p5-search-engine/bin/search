@@ -1,0 +1,96 @@
+#!/bin/bash
+# search
+
+# Stop on errors
+# See https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+set -Eeuo pipefail
+
+# Sanity check command line options
+usage() {
+  echo "Usage: $0 (create|destroy|reset|dump)"
+}
+
+if [ $# -ne 1 ]; then
+  usage
+  exit 1
+fi
+
+# Parse argument.  $1 is the first argument
+case $1 in
+  "start")
+    # echo "starting search server ..."
+    # echo "+ mkdir -p var/log"
+    # echo "+ rm -f var/log/search.log"
+    # echo "+ flask --app search run --host 0.0.0.0 --port 8000 &> var/log/search.log &"
+    # mkdir -p var/log
+    # rm -f var/log/search.log
+    # flask --app search run --host 0.0.0.0 --port 8000 &> var/log/search.log &
+    if [ -f var/search.sqlite3 ]; then
+
+        if ! ./bin/index status | grep -q "running"; then
+            echo "Error: index server is not running"
+            echo "Try: ./bin/index start"
+            exit 1
+        fi
+
+        if pgrep -f "flask --app search run --host 0.0.0.0 --port 8000" > /dev/null; then
+            echo "Error: search server is already running"
+            exit 1
+        else
+            echo "starting search server ..."
+            mkdir -p var/log
+            rm -f var/log/search.log
+            flask --app search run --host 0.0.0.0 --port 8000 &> var/log/search.log &
+            echo "+ mkdir -p var/log"
+            echo  "+ rm -f var/log/search.log"
+            echo "+ flask --app search run --host 0.0.0.0 --port 8000 &> var/log/search.log &"
+
+        fi
+    else
+        echo "Error: can't find search database var/search.sqlite3"
+        echo "Try: ./bin/searchdb create"
+        exit 1
+    fi
+    ;;
+
+  "stop")
+    # echo "+ rm -f var/search.sqlite3"
+    # rm -f var/search.sqlite3
+    echo "stopping search server ..."
+    pkill -f "flask --app search run --host 0.0.0.0 --port 8000" || true
+    echo "+ pkill -f "flask --app search run --host 0.0.0.0 --port 8000" || true"
+    ;;
+
+  "restart")
+    # echo "+ rm -f var/search.sqlite3"
+    # echo "+ mkdir -p var/"
+    # echo "+ sqlite3 var/search.sqlite3 < search_server/search/sql/search.sql"
+    # rm -f var/search.sqlite3
+    # mkdir -p var/
+    # sqlite3 var/search.sqlite3 < search_server/search/sql/search.sql
+    echo "stopping search server ..."
+    pkill -f "flask --app search run --host 0.0.0.0 --port 8000" || true
+    echo "+ pkill -f 'flask --app search run --host 0.0.0.0 --port 8000' || true"
+
+    echo "starting search server ..."
+    mkdir -p var/log
+    echo "+ mkdir -p var/log"
+    rm -f var/log/search.log
+    echo "+ rm -f var/log/search.log"
+    flask --app search run --host 0.0.0.0 --port 8000 &> var/log/search.log &
+    echo "+ flask --app index run --host 0.0.0.0 --port 8000 &> var/log/search.log &"
+    ;;
+
+  "status")
+    if pgrep -f "flask --app search run --host 0.0.0.0 --port 8000" > /dev/null; then
+        echo "search server running"
+    else
+        echo "search server stopped"
+        exit 1
+    fi
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac
